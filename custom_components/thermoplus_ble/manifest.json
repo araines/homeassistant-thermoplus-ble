@@ -4,7 +4,8 @@
   "documentation": "https://github.com/araines/homeassistant-thermoplus-ble",
   "requirements": [
     "aioblescan>=0.2.4",
-    "pycryptodomex>=3.9.7"
+    "pycryptodomex>=3.9.7",
+    "pybluez>=0.23"
   ],
   "dependencies": [],
   "codeowners": [
