@@ -45,7 +45,8 @@ class ScannerThread(Thread):
       return
 
     _LOGGER.debug("Scanner thread: creating connection")
-    self._event_loop = asyncio.get_event_loop()
+    self._event_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(self._event_loop)
     fac = self._event_loop._create_connection_transport(
       socket, aiobs.BLEScanRequester, None, None)
     conn, btctrl = self._event_loop.run_until_complete(fac)
