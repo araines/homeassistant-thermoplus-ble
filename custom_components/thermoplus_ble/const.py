@@ -1,7 +1,6 @@
 """Constants for the Thermoplus Bluetooth (BLE) sensor integration."""
-from homeassistant.const import (
-    DEVICE_CLASS_POWER,
-)
+# Domain
+DOMAIN = "thermoplus_ble"
 
 # Configuration options
 CONF_ROUNDING = "rounding"
