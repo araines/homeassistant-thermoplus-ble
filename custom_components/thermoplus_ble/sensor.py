@@ -1,10 +1,12 @@
 """Thermoplus Bluetooth (BLE) hydrometer / thermometer sensor integration."""
+import logging
+from time import sleep
+
 from homeassistant.const import (
   DEVICE_CLASS_TEMPERATURE,
   TEMP_CELSIUS,
 )
-import logging
-from time import sleep
+from homeassistant.helpers.entity import Entity
 
 DOMAIN = "thermoplus_ble" 
 
@@ -13,9 +15,9 @@ _LOGGER = logging.getLogger(__name__)
 def setup_platform(hass, config, add_entities, discovery_info=None):
   """Set up the sensor platform."""
   _LOGGER.debug("Starting")
-  scanner = BLEScanner()
-  hass.bus.listen("homeassistant_stop", scanner.shutdown_handler)
-  scanner.start(config)
+#  scanner = BLEScanner()
+#  hass.bus.listen("homeassistant_stop", scanner.shutdown_handler)
+#  scanner.start(config)
   sleep(1)
 
 class TemperatureSensor(Entity):
