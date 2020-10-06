@@ -1,6 +1,9 @@
 """Thermoplus Bluetooth (BLE) hydrometer / thermometer sensor integration."""
 import asyncio
+from collections import namedtuple
+from datetime import timedelta
 import logging
+import struct
 from time import sleep
 from threading import Thread
 
@@ -11,8 +14,12 @@ from homeassistant.const import (
   TEMP_CELSIUS,
 )
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.event import track_point_in_utc_time
+from homeassistant.util import dt
 
 DOMAIN = "thermoplus_ble" 
+HCI_EVENT = b'\x04'
+LE_ADVERTISING_REPORT = b'\x02'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,14 +27,17 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
   """Set up the sensor platform."""
   _LOGGER.debug("Starting")
   scanner = BLEScanner()
+  processor = Processor(hass, scanner, add_entities)
   hass.bus.listen("homeassistant_stop", scanner.shutdown_handler)
-  scanner.start(config)
+  scanner.start()
   sleep(1)
+  processor.update(dt.utcnow())
+  return True
 
 class ScannerThread(Thread):
   """Scanner Thread."""
 
-  def __init(self, hci_events, interface=0):
+  def __init__(self, hci_events, interface=0):
     """Initiate scanner thread."""
     Thread.__init__(self)
     _LOGGER.debug("Scanner thread: init")
@@ -88,9 +98,10 @@ class BLEScanner:
   hci_events = []
   thread = None
 
-  def start(self, config):
+  def start(self):
     """Start scanning for devices."""
     _LOGGER.debug("Starting scanner thread")
+    self.hci_events.clear()
     self.thread = ScannerThread(
       hci_events=self.hci_events,
     )
@@ -114,7 +125,87 @@ class BLEScanner:
     """Shutdown threads."""
     _LOGGER.debug("Shutting down: %s", event)
     self.stop()
-    
+
+class Processor:
+  """Bluetooth data processor."""
+
+  def __init__(self, hass, scanner, add_entities, period=60):
+    self._hass = hass
+    self._scanner = scanner
+    self._add_entities = add_entities
+    self._period = period
+    self._sensors = {}
+
+  def update(self, now):
+    """Schedule & process the scanner data."""
+    _LOGGER.debug("Update")
+    try:
+      self.process()
+    except RuntimeError as error:
+      _LOGGER.error("Error updating BLE data: %s", error)
+    track_point_in_utc_time(
+      self._hass, self.update, dt.utcnow() + timedelta(seconds=self._period)
+    )
+
+  def process(self):
+    _LOGGER.debug("Processing scanner data")
+    stopped = self._scanner.stop()
+    if stopped is False:
+      _LOGGER.error("Scanner thread did not stop, aborting data processing")
+      return []
+    events = [*self._scanner.hci_events] # fastest way to copy to minimise delay
+    self._scanner.start()
+    _LOGGER.debug("%d HCI events received", len(events))
+    for event in events:
+      data = self.parse_event(event)
+      if data is None:
+        continue
+      _LOGGER.debug("Processing: %s", data)
+      sensor_data = self.parse_sensor(data)
+      if sensor_data is None:
+        continue
+      if sensor_data.get('mac') not in self._sensors:
+        _LOGGER.debug("Creating sensor mac: %s", sensor_data.get('mac'))
+        # create
+        sensor = TemperatureSensor(sensor_data.get('mac'))
+        self._sensors[sensor_data.get('mac')] = sensor
+      sensor = self._sensors.get('mac')
+      sensor.update_temp(sensor_data.get('temperature'))
+      self._add_entities(self._sensors)
+
+  def parse_event(self, event):
+    # Ensure HCI Event packet
+    if event[:1] != HCI_EVENT:
+      return None
+    # Ensure LE Advertising Report
+    if event[3:4] != LE_ADVERTISING_REPORT:
+      return None
+    # Extract mac and rssi
+    reversed_mac = event[7:13]
+    mac = ':'.join('{:02X}'.format(x) for x in reversed_mac[::-1])
+    (rssi,) = struct.unpack("<b", event[-1:])
+    # Extract advertising data
+    advertising_data = event[14:-2]
+    return {
+      "mac": mac,
+      "rssi": rssi,
+      "data": advertising_data,
+    }
+
+  def parse_sensor(self, data):
+    advertising_data = data.get('data')
+    _LOGGER.debug("Advertising data length: %d", len(advertising_data))
+    if len(advertising_data) != 28:
+      return None
+    Payload = namedtuple('Payload', 'battery temperature humidity')
+    payload = Payload._make(struct.unpack('<HHH', advertising_data[19:25]))
+    return {
+      "mac": data.get('mac'),
+      "rssi": data.get('rssi'),
+      "battery": "%d" % payload.battery,
+      "temperature": "%.2f" % payload.temperature / 16,
+      "humidity": "%.2f" % payload.humidity / 16,
+    } 
 
 
 class TemperatureSensor(Entity):
@@ -144,3 +235,7 @@ class TemperatureSensor(Entity):
   def device_class(self):
     """Return the device class."""
     return DEVICE_CLASS_TEMPERATURE
+
+  def update_temp(self, temp):
+    """Update the temperature."""
+    self._state = temp
