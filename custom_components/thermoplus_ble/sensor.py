@@ -155,7 +155,7 @@ class Processor:
       return []
     events = [*self._scanner.hci_events] # fastest way to copy to minimise delay
     self._scanner.start()
-    _LOGGER.debug("%d HCI events received", len(events))
+    _LOGGER.info("%d HCI events received", len(events))
     for event in events:
       data = self.parse_event(event)
       if data is None:
@@ -164,14 +164,17 @@ class Processor:
       sensor_data = self.parse_sensor(data)
       if sensor_data is None:
         continue
-      if sensor_data.get('mac') not in self._sensors:
-        _LOGGER.debug("Creating sensor mac: %s", sensor_data.get('mac'))
+      mac = sensor_data.get('mac')
+      if mac not in self._sensors:
+        _LOGGER.info("Creating sensor: %s", sensor_data)
         # create
-        sensor = TemperatureSensor(sensor_data.get('mac'))
-        self._sensors[sensor_data.get('mac')] = sensor
-      sensor = self._sensors.get('mac')
+        sensor = TemperatureSensor(mac)
+        self._sensors[mac] = sensor
+      sensor = self._sensors.get(mac)
+      _LOGGER.info("Update sensor data: %s", sensor_data)
       sensor.update_temp(sensor_data.get('temperature'))
-      self._add_entities(self._sensors)
+      self._add_entities(list(self._sensors.values()))
+    _LOGGER.info("%d known sensors", len(self._sensors))
 
   def parse_event(self, event):
     # Ensure HCI Event packet
@@ -203,9 +206,9 @@ class Processor:
       "mac": data.get('mac'),
       "rssi": data.get('rssi'),
       "battery": "%d" % payload.battery,
-      "temperature": "%.2f" % payload.temperature / 16,
-      "humidity": "%.2f" % payload.humidity / 16,
-    } 
+      "temperature": "%.2f" % (payload.temperature / 16),
+      "humidity": "%.2f" % (payload.humidity / 16),
+    }
 
 
 class TemperatureSensor(Entity):

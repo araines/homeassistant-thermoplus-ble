@@ -2,6 +2,7 @@
   "domain": "thermoplus_ble",
   "name": "Thermoplus Bluetooth (BLE) hydrometer / thermometer sensor integration",
   "documentation": "https://github.com/araines/homeassistant-thermoplus-ble",
+  "issue_tracker": "https://github.com/araines/homeassistant-thermoplus-ble/issues",
   "requirements": [
     "aioblescan>=0.2.4",
     "pycryptodomex>=3.9.7"
@@ -9,6 +10,5 @@
   "dependencies": [],
   "codeowners": [
     "@araines"
-  ],
-  "config_flow": false
+  ]
 }
