@@ -17,7 +17,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import track_point_in_utc_time
 from homeassistant.util import dt
 
-DOMAIN = "thermoplus_ble" 
+DOMAIN = "thermoplus_ble"
 HCI_EVENT = b'\x04'
 LE_ADVERTISING_REPORT = b'\x02'
 
@@ -217,6 +217,7 @@ class TemperatureSensor(Entity):
   def __init__(self, mac):
     """Initialize the sensor."""
     self._state = None
+    self._mac = mac
     self._unique_id = f"t_{mac}"
 
   @property
@@ -242,3 +243,15 @@ class TemperatureSensor(Entity):
   def update_temp(self, temp):
     """Update the temperature."""
     self._state = temp
+
+  @property
+  def device_info(self):
+    return {
+      "identifiers": {
+          # Serial numbers are unique identifiers within a specific domain
+          (DOMAIN, self.unique_id)
+      },
+      "name": self.name,
+      "manufacturer": "Thermoplus",
+      "via_device": (DOMAIN, self._mac),
+    }
