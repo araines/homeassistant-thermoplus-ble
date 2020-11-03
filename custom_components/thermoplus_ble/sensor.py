@@ -203,7 +203,7 @@ class TemperatureSensor(Entity):
     }
 
   def _get_battery_level(self):
-    voltage = self._data.get('battery')
+    voltage = self._data.get('battery', 0)
     if voltage >= 3000:
       return 100
     elif voltage >= 2800:
