@@ -6,6 +6,7 @@ import struct
 from time import sleep
 
 from homeassistant.const import (
+  ATTR_BATTERY_LEVEL,
   DEVICE_CLASS_TEMPERATURE,
   TEMP_CELSIUS,
 )
@@ -84,7 +85,7 @@ class Processor:
       mac = sensor_data.get('mac')
       sensor = self._sensors.get(mac)
       _LOGGER.info("Update sensor data: %s", sensor_data)
-      sensor.update_temp(sensor_data.get('temperature'))
+      sensor.update_data(sensor_data)
     _LOGGER.info("%d known sensors", len(self._sensors))
 
   def parse_event(self, event):
@@ -143,9 +144,9 @@ class Processor:
       return {
         "mac": data.get('mac'),
         "rssi": data.get('rssi'),
-        "battery": "%d" % payload.battery,
-        "temperature": "%.2f" % (payload.temperature / 16),
-        "humidity": "%.2f" % (payload.humidity / 16),
+        "battery": int("%d" % payload.battery),
+        "temperature": float("%.2f" % (payload.temperature / 16)),
+        "humidity": float("%.2f" % (payload.humidity / 16)),
       }
     return None
 
@@ -158,16 +159,26 @@ class TemperatureSensor(Entity):
     self._state = None
     self._mac = mac
     self._unique_id = f"t_{mac}"
+    self._data = {}
+
+  def update_data(self, data):
+    """Update the sensor data."""
+    self._data = data
+
+  @property
+  def unique_id(self):
+    """Return the unique id."""
+    return self._unique_id
 
   @property
   def name(self):
     """Return the name of the sensor."""
-    return f"Thermoplus {self._unique_id}"
+    return f"Thermoplus {self._mac}"
 
   @property
   def state(self):
     """Return the state of the sensor."""
-    return self._state
+    return self._data.get('temperature')
 
   @property
   def unit_of_measurement(self):
@@ -179,10 +190,6 @@ class TemperatureSensor(Entity):
     """Return the device class."""
     return DEVICE_CLASS_TEMPERATURE
 
-  def update_temp(self, temp):
-    """Update the temperature."""
-    self._state = temp
-
   @property
   def device_info(self):
     return {
@@ -193,4 +200,27 @@ class TemperatureSensor(Entity):
       "name": self.name,
       "manufacturer": "Thermoplus",
       "via_device": (DOMAIN, self._mac),
+    }
+
+  def _get_battery_level(self):
+    voltage = self._data.get('battery')
+    if voltage >= 3000:
+      return 100
+    elif voltage >= 2800:
+      return 80
+    elif voltage >= 2600:
+      return 60
+    elif voltage >= 2500:
+      return 40
+    elif voltage >= 2450:
+      return 20
+    else:
+      return 0
+
+  @property
+  def device_state_attributes(self):
+    """Return the state attributes."""
+    return {
+      **self._data,
+      ATTR_BATTERY_LEVEL: self._get_battery_level(),
     }
