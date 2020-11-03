@@ -20,10 +20,7 @@ Available under different brands, e.g. [Brifit][smart-hygrometer-link]
 ## Known Issues
 
 - Code isn't well tested at the moment
-- Picks up more than just Thermoplus / ThermoBeacon sensors resulting in garbage data
 - Currently does not support humidity
-- Currently does not support battery level
-- No way to map known sensors to "friendly" names
 
 ## Troubleshooting
 
@@ -43,6 +40,10 @@ Once you have installed, restart Home Assistant.  Add your configuration (see be
 sensor:
   - platform: thermoplus_ble
 ```
+
+## Using your sensors
+
+Each sensor will show up as an Entity starting "Thermoplus" followed by its unique MAC address.
 
 ## Notes
 

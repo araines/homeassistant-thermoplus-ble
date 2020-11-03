@@ -1,5 +1,5 @@
 {
   "name": "Thermoplus Bluetooth (BLE) hydrometer / thermometer sensor integration.",
   "domains": "sensor",
-  "iot_class": "local push"
+  "iot_class": "Local Push"
 }
