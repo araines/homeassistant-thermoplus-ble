@@ -32,12 +32,16 @@ class BLEScanner:
   hci_events = []
   thread = None
 
+  def __init__(self, interface):
+    self._interface = interface
+
   def start(self):
     """Start scanning for devices."""
-    _LOGGER.debug("Starting scanner thread")
+    _LOGGER.info("Starting scanner thread on interface %s", self._interface)
     self.hci_events.clear()
     self.thread = ScannerThread(
       hci_events=self.hci_events,
+      interface=self._interface,
     )
     self.thread.start()
 

@@ -15,8 +15,8 @@ from homeassistant.helpers.event import track_point_in_utc_time
 from homeassistant.util import dt
 
 from .ble import BLEScanner
+from .const import DOMAIN, CONF_HCI_INTERFACE, CONF_HCI_DUMP
 
-DOMAIN = "thermoplus_ble"
 HCI_EVENT = b'\x04'
 LE_ADVERTISING_REPORT = b'\x02'
 TYPE_DEVICE_NAME = b'\x09'
@@ -28,8 +28,8 @@ _LOGGER = logging.getLogger(__name__)
 def setup_platform(hass, config, add_entities, discovery_info=None):
   """Set up the sensor platform."""
   _LOGGER.debug("Starting")
-  scanner = BLEScanner()
-  processor = Processor(hass, scanner, add_entities)
+  scanner = BLEScanner(interface=hass.data[DOMAIN].get(CONF_HCI_INTERFACE))
+  processor = Processor(hass, scanner, add_entities, dump=hass.data[DOMAIN].get(CONF_HCI_DUMP))
   hass.bus.listen("homeassistant_stop", scanner.shutdown_handler)
   scanner.start()
   sleep(1)
@@ -39,11 +39,12 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class Processor:
   """Bluetooth data processor."""
 
-  def __init__(self, hass, scanner, add_entities, period=60):
+  def __init__(self, hass, scanner, add_entities, period=60, dump=False):
     self._hass = hass
     self._scanner = scanner
     self._add_entities = add_entities
     self._period = period
+    self._dump = dump
     self._sensors = {}
 
   def update(self, now):
@@ -69,6 +70,8 @@ class Processor:
 
     # Work through events
     for event in events:
+      if self._dump:
+        _LOGGER.info("HCI DUMP: %s", event.hex())
       data = self.parse_event(event)
       if data is None:
         continue
