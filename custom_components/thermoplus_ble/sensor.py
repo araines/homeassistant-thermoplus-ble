@@ -15,8 +15,8 @@ from homeassistant.helpers.event import track_point_in_utc_time
 from homeassistant.util import dt
 
 from .ble import BLEScanner
+from .const import DOMAIN, CONF_HCI_INTERFACE
 
-DOMAIN = "thermoplus_ble"
 HCI_EVENT = b'\x04'
 LE_ADVERTISING_REPORT = b'\x02'
 TYPE_DEVICE_NAME = b'\x09'
@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 def setup_platform(hass, config, add_entities, discovery_info=None):
   """Set up the sensor platform."""
   _LOGGER.debug("Starting")
-  scanner = BLEScanner()
+  scanner = BLEScanner(interface=hass.data[DOMAIN].get(CONF_HCI_INTERFACE))
   processor = Processor(hass, scanner, add_entities)
   hass.bus.listen("homeassistant_stop", scanner.shutdown_handler)
   scanner.start()
