@@ -57,8 +57,44 @@ Devices:
 
 You can configure the HCI interface within the `configuration.yaml`:
 
-```
+```yaml
 thermoplus_ble:
   hci_interface: 0
-
 ```
+
+## Debugging
+
+### Logging
+
+To enable `debug` logging, add the following lines to `configuration.yaml`:
+
+```yaml
+logger:
+  default: warn
+  logs:
+    custom_components.thermoplus_ble: debug
+```
+
+Warning: this will potentially log a LOT of data, it is not recommended to run in `debug` mode for long periods of time.
+
+### Raw dump all BLE data
+
+If your sensor is still not showing up, you can enable HCI dump to log all HCI events in to the logs. To enable `info` logging, add the following lines to `configuration.yaml`:
+
+```yaml
+logger:
+  default: warn
+  logs:
+    custom_components.thermoplus_ble: info
+```
+
+Then turn on the HCI dump:
+
+```yaml
+thermoplus_ble:
+  hci_dump: true
+```
+
+## Still stuck?
+
+Please raise a GitHub issue if you are experiencing issues with your sensors or have a different sensor type you would like supported.
