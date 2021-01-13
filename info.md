@@ -6,6 +6,8 @@ Bluetooth adapter for Home Assistant compatible with Thermoplus (Sensor Blue) BL
 
 This integration listens for the Bluetooth Low Energy packets being constantly emmitted by the sensors and therefore does not increase battery usage of the sensors. The data received includes current temperature, humidity and battery level.
 
+In order to use this integration your host will need Bluetooth 4.0+ capability, either through native hardware (e.g. on the RaspberryPi 4) or through a USB dongle.
+
 ## Features
 
 ### Supported Sensors
