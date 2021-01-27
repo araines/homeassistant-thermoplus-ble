@@ -19,6 +19,18 @@ In order to use this integration your host will need Bluetooth 4.0+ capability, 
 
 Available under different brands, e.g. [Brifit][smart-hygrometer-link]
 
+- Lanyard Hygrometer
+
+![Lanyard Hygrometer][lanyard-hygrometer-image]
+
+Available under different brands, e.g. [Brifit][lanyard-hygrometer-link]
+
+- Mini Hygrometer
+
+![Mini Hygrometer][mini-hygrometer-image]
+
+Available under different brands, e.g. [Brifit][mini-hygrometer-link]
+
 ## Known Issues
 
 - Code isn't well tested at the moment
@@ -56,4 +68,8 @@ TODO
 [hacs-site]: https://hacs.xyz/
 [smart-hygrometer-image]: https://github.com/araines/homeassistant-thermoplus-ble/raw/master/images/smart-hygrometer.jpg
 [smart-hygrometer-link]: https://www.amazon.co.uk/Brifit-Thermometer-Hygrometer-Temperature-Greenhouse/dp/B08BHPS45S
+[lanyard-hygrometer-image]: https://github.com/araines/homeassistant-thermoplus-ble/raw/master/images/lanyard-hygrometer.jpg
+[lanyard-hygrometer-link]: https://www.amazon.co.uk/Brifit-Thermometer-Hygrometer-Temperature-Notification/dp/B08MBPRMFZ
+[mini-hygrometer-image]: https://github.com/araines/homeassistant-thermoplus-ble/raw/master/images/mini-hygrometer.jpg
+[mini-hygrometer-link]: https://www.amazon.co.uk/Brifit-Thermometer-Hygrometer-Temperature-Greenhouse/dp/B085C963Y3
 [troubleshooting-link]: https://github.com/araines/homeassistant-thermoplus-ble/blob/master/troubleshooting.md
