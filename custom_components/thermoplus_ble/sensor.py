@@ -143,7 +143,7 @@ class Processor:
       if len(value) != 19:
         continue
       Payload = namedtuple('Payload', 'battery temperature humidity')
-      payload = Payload._make(struct.unpack('<HHH', value[10:16]))
+      payload = Payload._make(struct.unpack('<HhH', value[10:16]))
       return {
         "mac": data.get('mac'),
         "rssi": data.get('rssi'),
