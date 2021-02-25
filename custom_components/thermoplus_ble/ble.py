@@ -1,17 +1,9 @@
 """Bluetooth Low Energy Scanner."""
 import asyncio
 import logging
-import struct
-from collections import namedtuple
-from datetime import timedelta
 from threading import Thread
-from time import sleep
 
 import aioblescan as aiobs
-from homeassistant.helpers.event import track_point_in_utc_time
-from homeassistant.util import dt
-
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,13 +42,12 @@ class BLEScanner:
     _LOGGER.debug("Stopping scanner thread")
     if self.thread is None:
       return True
-    if self.thread.isAlive():
+    if self.thread.is_alive():
       self.thread.join()
-      if self.thread.isAlive():
+      if self.thread.is_alive():
         _LOGGER.error("Waiting for scanner thread took too long")
         return False
-      else:
-        self.thread = None
+      self.thread = None
     return True
 
   def shutdown_handler(self, event):
