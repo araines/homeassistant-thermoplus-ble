@@ -209,16 +209,15 @@ class TemperatureSensor(Entity):
     voltage = self._data.get('battery', 0)
     if voltage >= 3000:
       return 100
-    elif voltage >= 2800:
+    if voltage >= 2800:
       return 80
-    elif voltage >= 2600:
+    if voltage >= 2600:
       return 60
-    elif voltage >= 2500:
+    if voltage >= 2500:
       return 40
-    elif voltage >= 2450:
+    if voltage >= 2450:
       return 20
-    else:
-      return 0
+    return 0
 
   @property
   def device_state_attributes(self):
