@@ -1,5 +1,7 @@
 [![hacs-badge][hacs-badge]][hacs-link]
 
+***Please note:** I'm recommending that people use ble_monitor (https://github.com/custom-components/ble_monitor) from this point forwards.  The maintainers there have kindly integrated support for Thermoplus sensors as of version 3.1, as well as many other great features!*
+
 # homeassistant-thermoplus-ble
 
 Bluetooth adapter for Home Assistant compatible with Thermoplus (Sensor Blue) BLE thermometers.
